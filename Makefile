@@ -37,3 +37,21 @@ freeze:
 
 shell:
 	web/manage.py shell_plus
+
+deploy:
+	git stash -u
+	yarn --cwd ./web/app install
+	yarn --cwd ./web/app build
+	make sync
+	ssh ${REMOTE_USER}@${REMOTE_HOST} "${PROJECT_NAME}/api/manage.py migrate" -i ~/.ssh/google_compute_engine
+	git stash pop
+
+sync:
+	rsync --delete -avzr --include=web --exclude=web/app/ --include=web/app/build/ --filter=':- .gitignore' . ${REMOTE_USER}@${REMOTE_HOST}:/home/${REMOTE_USER}/${PROJECT_NAME}
+
+
+ssh-gcloud:
+	gcloud beta compute --project ${GCLOUD_PROJECT} ssh --zone "us-west1-b" ${PROJECT_NAME}
+
+ssh:
+	ssh ${REMOTE_USER}@${REMOTE_HOST} -i ~/.ssh/google_compute_engine
