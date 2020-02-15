@@ -39,12 +39,12 @@ shell:
 	web/manage.py shell_plus
 
 deploy:
-	git stash -u
+	# git stash -u
 	yarn --cwd ./web/app install
 	yarn --cwd ./web/app build
 	make sync
-	ssh -i ~/.ssh/google_compute_engine ${REMOTE_USER}@${REMOTE_HOST} "${PROJECT_NAME}/api/manage.py migrate" -i ~/.ssh/google_compute_engine
-	git stash pop
+	ssh -i ~/.ssh/google_compute_engine ${REMOTE_USER}@${REMOTE_HOST} "pip install -r ${PROJECT_NAME}/requirements.txt && ${PROJECT_NAME}/web/manage.py migrate" -i ~/.ssh/google_compute_engine
+	# git stash pop
 
 sync:
 	rsync --delete -avzr -e "ssh -i ~/.ssh/google_compute_engine" --include=web --include=web/* --include=web/app --include=web/app/build/ --include=web/app/build/* --exclude='web/app/*' --filter=':- .gitignore' . ${REMOTE_USER}@${REMOTE_HOST}:/home/${REMOTE_USER}/${PROJECT_NAME}
